@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Loan Calculator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body { background: #f4f6ff; }
+    .calculator-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .slider-label {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .value-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2b4eff;
+    }
+    .highlight {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2b4eff;
+    }
+  </style>
+</head>
+<body class="p-4">
+
+  <!-- Button trigger -->
+  <button class="btn btn-primary loan-calculation">Open Loan Calculator</button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="loanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body calculator-box">
+          <h4 class="mb-4">Mortgage Calculator</h4>
+
+          <!-- Row 1: Sliders -->
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="slider-label">Purchase price: <span id="purchaseVal" class="value-text">$450,000</span></div>
+              <input type="range" class="form-range" id="purchasePrice" min="50000" max="1000000" step="1000" value="450000">
+            </div>
+            <div class="col-md-4">
+              <div class="slider-label">Equity: <span id="equityVal" class="value-text">$135,000</span></div>
+              <input type="range" class="form-range" id="equity" min="0" max="500000" step="1000" value="135000">
+            </div>
+            <div class="col-md-4">
+              <div class="slider-label">Repayment time: <span id="yearsVal" class="value-text">25 years</span></div>
+              <input type="range" class="form-range" id="repaymentYears" min="1" max="40" step="1" value="25">
+            </div>
+          </div>
+
+          <!-- Row 2: Results -->
+          <div class="row text-center">
+            <div class="col-md-6">
+              <p><strong>Loan amount</strong></p>
+              <p id="loanAmount" class="highlight"></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Estimated per month</strong></p>
+              <p id="monthlyPayment" class="highlight"></p>
+              <small class="text-muted">2.10% eff. / 2.4% nominal interest</small>
+            </div>
+          </div>
+
+          <!-- Button -->
+          <div class="mt-4">
+            <button class="btn btn-primary w-100">Get a mortgage quote</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+$(document).ready(function(){
+
+  const interestRate = 2.4; // nominal annual interest rate (%)
+
+  function formatCurrency(num){
+    return "$" + Number(num).toLocaleString();
+  }
+
+  function calculateLoan(){
+    let purchase = parseFloat($('#purchasePrice').val());
+    let equity = parseFloat($('#equity').val());
+    let years = parseInt($('#repaymentYears').val());
+
+    let loanAmount = purchase - equity;
+    let months = years * 12;
+    let monthlyRate = interestRate / 100 / 12;
+
+    // EMI Formula
+    let monthlyPayment = (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -months));
+
+    // Update UI
+    $('#purchaseVal').text(formatCurrency(purchase));
+    $('#equityVal').text(formatCurrency(equity));
+    $('#yearsVal').text(years + " years");
+    $('#loanAmount').text(formatCurrency(loanAmount));
+    $('#monthlyPayment').text(formatCurrency(monthlyPayment.toFixed(0)));
+  }
+
+  // Open modal
+  $(document).on('click','.loan-calculation',function(){
+    $('#loanModal').modal('show');
+    calculateLoan(); // initial calculation
+  });
+
+  // Update on slider move
+  $('#purchasePrice, #equity, #repaymentYears').on('input', function(){
+    calculateLoan();
+  });
+
+});
+</script>
+</body>
+</html>
